@@ -347,7 +347,7 @@ class DataService {
     return true;
   }
 
-  bookRoom(roomNumber, bookingDetails, tenant, role = 'student') {
+  async bookRoom(roomNumber, bookingDetails, tenant, role = 'student') {
     const room = this.data.rooms.find((r) => r.room_number.toUpperCase() === roomNumber.toUpperCase());
     if (!room) {
       return { success: false, message: 'Room ' + roomNumber + ' does not exist.' };
@@ -421,9 +421,23 @@ class DataService {
       purpose: bookingDetails.purpose || 'Study / Team Session',
     };
 
+    // Confirm with backend first
+    try {
+      const session = this.getSession();
+      const backendRes = await api.bookRoom(roomNumber, newBooking, session);
+      if (backendRes && (backendRes._id || backendRes.id)) {
+        newBooking.booking_id = backendRes._id || backendRes.id;
+      }
+    } catch (err) {
+      return {
+        success: false,
+        message: err.message || 'Conflict: Room booking rejected by server.',
+      };
+    }
+
     const rooms = this.data.rooms.map((r) => {
       if (r.room_number.toUpperCase() === roomNumber.toUpperCase()) {
-        return { ...r, bookings: [...r.bookings, newBooking] };
+        return { ...r, bookings: [...(r.bookings || []), newBooking] };
       }
       return r;
     });
@@ -431,9 +445,7 @@ class DataService {
     this.saveData({ ...this.data, rooms });
 
     const session = this.getSession();
-    api.bookRoom(roomNumber, newBooking, session)
-      .then(() => this.refreshFromBackend(session))
-      .catch((e) => console.warn('[bookRoom] Backend sync notice:', e.message));
+    this.refreshFromBackend(session).catch((e) => console.warn('[bookRoom] Refresh notice:', e.message));
 
     return {
       success: true,

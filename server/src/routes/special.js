@@ -15,4 +15,7 @@ r.get('/events/:id/registrations', specialController.getEventRegistrations);
 r.post('/events/:id/registrations', specialController.registerForEvent);
 r.delete('/events/:id/registrations/:student_id', specialController.cancelRegistration);
 
+// Campus Live Stats
+r.get('/stats', specialController.getStats);
+
 export default r;

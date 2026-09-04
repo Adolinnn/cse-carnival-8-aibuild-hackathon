@@ -13,6 +13,7 @@ import {
   Share2,
   Edit2,
   Trash2,
+  ExternalLink,
 } from 'lucide-react';
 import { Modal } from '../common/Modal';
 import { showToast } from '../common/Toast';
@@ -36,6 +37,7 @@ export const EventsView = ({ events, session }) => {
     location: 'Auditorium 7C01',
     capacity: 50,
     description: '',
+    url: '',
     is_global: true,
   });
 
@@ -50,6 +52,7 @@ export const EventsView = ({ events, session }) => {
     location: 'Auditorium 7C01',
     capacity: 50,
     description: '',
+    url: '',
     is_global: true,
   });
 
@@ -140,6 +143,7 @@ export const EventsView = ({ events, session }) => {
       location: event.location || event.venue || 'Auditorium 7C01',
       capacity: event.capacity || 50,
       description: event.description || '',
+      url: event.url || '',
       is_global: event.is_global ?? true,
     });
     setIsEditOpen(true);
@@ -327,7 +331,23 @@ export const EventsView = ({ events, session }) => {
               </div>
 
               {/* Action Buttons */}
-              <div className="pt-2">
+              <div className="pt-2 space-y-2">
+                {/* Event URL / Details Button */}
+                {event.url ? (
+                  <button
+                    onClick={() => {
+                      const targetUrl = event.url.startsWith('http') ? event.url : `https://${event.url}`;
+                      window.open(targetUrl, '_blank', 'noopener,noreferrer');
+                    }}
+                    className="w-full py-2 px-3 rounded-xl text-xs font-bold bg-[#E8F9FF] hover:bg-[#C4D9FF] dark:bg-slate-800 dark:hover:bg-slate-700 text-campus-700 dark:text-campus-300 border border-[#C4D9FF] dark:border-slate-700 flex items-center justify-center gap-1.5 transition-colors shadow-xs"
+                    title="Open official event link in new tab"
+                  >
+                    <span>Open Event Link</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </button>
+                ) : null}
+
+                {/* RSVP / Registration Button */}
                 {isRegistered ? (
                   <div className="flex items-center gap-2">
                     <div className="flex-1 py-2 rounded-xl text-xs font-bold bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 flex items-center justify-center gap-1.5">
@@ -344,15 +364,31 @@ export const EventsView = ({ events, session }) => {
                   </div>
                 ) : (
                   <button
-                    onClick={() => handleRegister(event)}
+                    onClick={() => {
+                      if (event.url && !isRegistered) {
+                        // Open URL and register
+                        const targetUrl = event.url.startsWith('http') ? event.url : `https://${event.url}`;
+                        window.open(targetUrl, '_blank', 'noopener,noreferrer');
+                      }
+                      handleRegister(event);
+                    }}
                     disabled={isFull}
-                    className={'w-full py-2.5 rounded-xl text-xs font-bold transition-all shadow-md ' +
+                    className={'w-full py-2.5 rounded-xl text-xs font-bold transition-all shadow-md flex items-center justify-center gap-1.5 ' +
                       (isFull
                         ? 'bg-slate-200 text-slate-400 dark:bg-slate-800 dark:text-slate-500 cursor-not-allowed'
                         : 'bg-campus-600 hover:bg-campus-500 text-white shadow-campus-600/20')
                     }
                   >
-                    {isFull ? 'Event Full (Waitlist)' : '1-Click RSVP'}
+                    {isFull ? (
+                      'Event Full (Waitlist)'
+                    ) : event.url ? (
+                      <>
+                        <span>Register / View Event</span>
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </>
+                    ) : (
+                      '1-Click RSVP'
+                    )}
                   </button>
                 )}
 
@@ -516,6 +552,19 @@ export const EventsView = ({ events, session }) => {
 
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+              Event Website / Registration URL
+            </label>
+            <input
+              type="url"
+              value={formData.url}
+              onChange={(e) => setFormData({ ...formData, url: e.target.value })}
+              placeholder="https://example.com/event-details-or-rsvp"
+              className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-950 border border-[#C4D9FF] dark:border-slate-700 text-xs text-slate-900 dark:text-white"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
               Description
             </label>
             <textarea
@@ -650,6 +699,19 @@ export const EventsView = ({ events, session }) => {
                 placeholder="e.g. Auditorium 7C01"
                 className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-950 border border-[#C4D9FF] dark:border-slate-700 text-xs text-slate-900 dark:text-white"
                 required
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                Event Website / Registration URL
+              </label>
+              <input
+                type="url"
+                value={editFormData.url}
+                onChange={(e) => setEditFormData({ ...editFormData, url: e.target.value })}
+                placeholder="https://example.com/event-details-or-rsvp"
+                className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-950 border border-[#C4D9FF] dark:border-slate-700 text-xs text-slate-900 dark:text-white"
               />
             </div>
 

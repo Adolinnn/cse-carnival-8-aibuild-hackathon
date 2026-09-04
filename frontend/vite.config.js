@@ -10,7 +10,7 @@ export default defineConfig({
     host: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:4000',
+        target: 'https://campusos-web.onrender.com',
         changeOrigin: true,
         secure: false,
       },

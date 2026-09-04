@@ -138,7 +138,7 @@ export const RoomsView = ({ rooms, session, simulatedDate, simulatedTime }) => {
     setIsBookingOpen(true);
   };
 
-  const handleBookingSubmit = (e) => {
+  const handleBookingSubmit = async (e) => {
     e.preventDefault();
     if (!selectedRoom) return;
 
@@ -153,7 +153,7 @@ export const RoomsView = ({ rooms, session, simulatedDate, simulatedTime }) => {
       return;
     }
 
-    const res = dataService.bookRoom(
+    const res = await dataService.bookRoom(
       selectedRoom.room_number,
       {
         date: bookingDate,
@@ -290,35 +290,6 @@ export const RoomsView = ({ rooms, session, simulatedDate, simulatedTime }) => {
             <span>Add New Room</span>
           </button>
         )}
-      </div>
-
-      {/* Dynamic Live Availability Stats Bar */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-900/90 border border-[#C4D9FF] dark:border-slate-800 shadow-sm">
-          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Total Rooms</span>
-          <span className="text-2xl font-extrabold text-slate-900 dark:text-white font-mono">{totalRoomsCount}</span>
-        </div>
-
-        <div className="p-3.5 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-800/50 shadow-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider block">Available Now</span>
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          </div>
-          <div className="flex items-baseline gap-1 mt-0.5">
-            <span className="text-2xl font-extrabold text-emerald-700 dark:text-emerald-400 font-mono">{availableNowCount}</span>
-            <span className="text-xs text-emerald-600/80 dark:text-emerald-500">/ {totalRoomsCount} free</span>
-          </div>
-        </div>
-
-        <div className="p-3.5 rounded-2xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/50 shadow-sm">
-          <span className="text-[11px] font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wider block">Booked Today</span>
-          <span className="text-2xl font-extrabold text-amber-700 dark:text-amber-400 font-mono">{bookedTodayCount}</span>
-        </div>
-
-        <div className="p-3.5 rounded-2xl bg-rose-50/70 dark:bg-rose-950/30 border border-rose-200/80 dark:border-rose-800/50 shadow-sm">
-          <span className="text-[11px] font-bold text-rose-800 dark:text-rose-300 uppercase tracking-wider block">Occupied Slot</span>
-          <span className="text-2xl font-extrabold text-rose-700 dark:text-rose-400 font-mono">{occupiedNowCount}</span>
-        </div>
       </div>
 
       {/* Filters Bar */}

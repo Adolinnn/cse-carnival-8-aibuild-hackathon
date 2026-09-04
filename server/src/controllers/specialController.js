@@ -1,4 +1,6 @@
-import { Booking, Registration } from '../models/index.js';
+import {
+  Booking, Registration, Schedule, Room, Event, Announcement, Assignment,
+} from '../models/index.js';
 import {
   getRoom, findAvailableRooms, bookRoom as bookRoomService, cancelBooking as cancelBookingService,
   registerForEvent as registerEventService, cancelRegistration as cancelRegistrationService,
@@ -97,5 +99,37 @@ export async function cancelRegistration(req, res, next) {
     });
     if (!result.ok) return res.status(404).json({ error: result.reason });
     res.json(result);
+  } catch (e) { next(e); }
+}
+
+export async function getStats(req, res, next) {
+  try {
+    const tenant = req.tenant || {};
+    const { dept = 'CSE', semester = '4.1', section = 'B' } = tenant;
+
+    const tenantQ = {
+      $or: [
+        { dept, semester, section },
+        { section: { $in: ['CS', 'DWM', 'All', 'Open'] } },
+        { is_global: true },
+        { dept: { $exists: false } },
+      ],
+    };
+
+    const [schedulesCount, roomsCount, eventsCount, announcementsCount, assignmentsCount] = await Promise.all([
+      Schedule.countDocuments(tenantQ),
+      Room.countDocuments({}),
+      Event.countDocuments({}),
+      Announcement.countDocuments({}),
+      Assignment.countDocuments({ dept, semester }),
+    ]);
+
+    res.json({
+      schedules: schedulesCount,
+      rooms: roomsCount,
+      events: eventsCount,
+      announcements: announcementsCount,
+      assignments: assignmentsCount,
+    });
   } catch (e) { next(e); }
 }

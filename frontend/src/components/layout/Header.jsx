@@ -28,6 +28,7 @@ export const Header = ({
   simulatedDate,
   setSimulatedDate,
   simulatedTime,
+  simulatedTimeWithSeconds,
   setSimulatedTime,
   activeTab,
   setActiveTab,
@@ -112,17 +113,19 @@ export const Header = ({
           {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-indigo-600" />}
         </button>
 
-        {/* Simulated Time Picker Pill */}
+        {/* Simulated Dynamic Time Picker Pill */}
         <button
           onClick={() => setIsTimeModalOpen(true)}
-          className="flex items-center gap-1 px-2 sm:px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-[#C4D9FF] dark:border-slate-700/80 text-xs text-slate-800 dark:text-slate-200 hover:border-campus-500/50 hover:bg-[#E8F9FF] dark:hover:bg-slate-800 transition-colors shadow-sm"
-          title="Click to adjust simulated campus time"
+          className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-[#C4D9FF] dark:border-slate-700/80 text-xs text-slate-800 dark:text-slate-200 hover:border-campus-500/50 hover:bg-[#E8F9FF] dark:hover:bg-slate-800 transition-colors shadow-sm group"
+          title="Click to adjust simulated campus clock (Live Ticking Active)"
         >
-          <Clock className="w-3.5 h-3.5 text-campus-500 dark:text-campus-400 shrink-0" />
-          <span className="hidden xl:inline font-mono text-slate-700 dark:text-slate-300 font-medium">
-            {simulatedDate} · {simulatedTime}
+          <Clock className="w-3.5 h-3.5 text-campus-500 dark:text-campus-400 shrink-0 group-hover:rotate-12 transition-transform" />
+          <span className="hidden xl:inline font-mono text-slate-700 dark:text-slate-300 font-semibold tracking-wide">
+            {simulatedDate} · {simulatedTimeWithSeconds || simulatedTime}
           </span>
-          <span className="xl:hidden font-mono text-slate-700 dark:text-slate-300 font-medium">{simulatedTime}</span>
+          <span className="xl:hidden font-mono text-slate-700 dark:text-slate-300 font-semibold tracking-wide">
+            {simulatedTimeWithSeconds || simulatedTime}
+          </span>
         </button>
 
         {/* Logout Button */}

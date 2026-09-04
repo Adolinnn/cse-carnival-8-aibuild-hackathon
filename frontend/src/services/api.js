@@ -201,6 +201,11 @@ export const api = {
     return httpClient.put(ENDPOINTS.AGENT_CONFIG.UPDATE, config, session);
   },
 
+  // Stats
+  getStats: async (session) => {
+    return httpClient.get(ENDPOINTS.STATS, session);
+  },
+
   // AI Chat
   sendChatMessage: async (messages, session) => {
     return httpClient.post(ENDPOINTS.CHAT.SEND, { messages }, session);

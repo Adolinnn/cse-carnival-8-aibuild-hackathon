@@ -54,6 +54,7 @@ export const ENDPOINTS = {
     GET: '/agent-config',
     UPDATE: '/agent-config',
   },
+  STATS: '/stats',
   CHAT: {
     SEND: '/chat',
   },

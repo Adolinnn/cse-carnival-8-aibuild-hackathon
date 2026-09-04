@@ -15,6 +15,7 @@ export function AppLayout({
   simulatedDate,
   setSimulatedDate,
   simulatedTime,
+  simulatedTimeWithSeconds,
   setSimulatedTime,
   theme,
   onToggleTheme,
@@ -30,6 +31,7 @@ export function AppLayout({
         simulatedDate={simulatedDate}
         setSimulatedDate={setSimulatedDate}
         simulatedTime={simulatedTime}
+        simulatedTimeWithSeconds={simulatedTimeWithSeconds}
         setSimulatedTime={setSimulatedTime}
         activeTab={activeTab}
         setActiveTab={setActiveTab}

@@ -58,6 +58,7 @@ const Event = mongoose.model('Event', new Schema({
   venue: String,
   organizer: String,
   capacity: Number,
+  url: String,                // External registration or event website URL
   status: String,             // upcoming | ongoing | completed | cancelled | full
   is_global: { type: Boolean, default: true },
   dept: { type: String, default: 'CSE', index: true },

@@ -26,6 +26,7 @@ export function App() {
     simulatedDate,
     setSimulatedDate,
     simulatedTime,
+    simulatedTimeWithSeconds,
     setSimulatedTime,
   } = useSimulatedClock();
 
@@ -195,6 +196,7 @@ export function App() {
         simulatedDate={simulatedDate}
         setSimulatedDate={setSimulatedDate}
         simulatedTime={simulatedTime}
+        simulatedTimeWithSeconds={simulatedTimeWithSeconds}
         setSimulatedTime={setSimulatedTime}
         theme={theme}
         onToggleTheme={toggleTheme}

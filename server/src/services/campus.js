@@ -8,6 +8,18 @@ export function overlaps(aStart, aEnd, bStart, bEnd) {
   return aStart < bEnd && aEnd > bStart;
 }
 
+export function getWeekday(dateString) {
+  if (!dateString) return '';
+  const parts = String(dateString).trim().split('-');
+  if (parts.length === 3) {
+    const [y, m, d] = parts.map(Number);
+    const dt = new Date(Date.UTC(y, m - 1, d));
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    return days[dt.getUTCDay()];
+  }
+  return '';
+}
+
 // Normalize equipment input (handles array, string, comma-separated string)
 function normalizeEquipment(equipment) {
   if (Array.isArray(equipment)) return equipment.map(e => String(e).trim()).filter(Boolean);
@@ -120,14 +132,28 @@ export async function findAvailableRooms({
   }
   const rooms = await Room.find(q).lean();
 
-  const clashing = await Booking.find({
+  const clashingBookings = await Booking.find({
     date,
     start_time: { $lt: end_time },
     end_time: { $gt: start_time },
   }).distinct('room_number');
-  const busy = new Set(clashing);
 
-  return rooms.filter(r => !busy.has(r.room_number))
+  const weekday = getWeekday(date);
+  let clashingClasses = [];
+  if (weekday) {
+    clashingClasses = await Schedule.find({
+      day: new RegExp(`^${weekday}$`, 'i'),
+      start_time: { $lt: end_time },
+      end_time: { $gt: start_time },
+    }).distinct('room');
+  }
+
+  const busy = new Set([
+    ...clashingBookings.map(r => String(r).toUpperCase()),
+    ...clashingClasses.map(r => String(r).toUpperCase()),
+  ]);
+
+  return rooms.filter(r => !busy.has(String(r.room_number).toUpperCase()))
     .sort((a, b) => a.capacity - b.capacity);
 }
 
@@ -152,6 +178,7 @@ export async function bookRoom({
   if (room.status !== 'available')
     return { ok: false, reason: `Room ${room.room_number} is marked unavailable.` };
 
+  // 1. Conflict check: Existing room bookings
   const clash = await Booking.findOne({
     room_number: room.room_number, date,
     start_time: { $lt: end_time },
@@ -160,8 +187,26 @@ export async function bookRoom({
   if (clash) {
     return {
       ok: false,
-      reason: `Room ${room.room_number} is already booked on ${date} from ${clash.start_time} to ${clash.end_time}.`,
+      reason: `Conflict: Room ${room.room_number} is already booked on ${date} from ${clash.start_time} to ${clash.end_time} (${clash.purpose || 'Reserved by ' + clash.booked_by}).`,
     };
+  }
+
+  // 2. Conflict check: Scheduled university classes in this room on that weekday
+  const weekday = getWeekday(date);
+  if (weekday) {
+    const classClash = await Schedule.findOne({
+      room: new RegExp(`^${cleanRoomNumber}$`, 'i'),
+      day: new RegExp(`^${weekday}$`, 'i'),
+      start_time: { $lt: end_time },
+      end_time: { $gt: start_time },
+    }).lean();
+
+    if (classClash) {
+      return {
+        ok: false,
+        reason: `Conflict: Room ${room.room_number} has a scheduled class (${classClash.course} - ${classClash.title || 'Class'}) on ${weekday} from ${classClash.start_time} to ${classClash.end_time}.`,
+      };
+    }
   }
 
   const booking = await Booking.create({

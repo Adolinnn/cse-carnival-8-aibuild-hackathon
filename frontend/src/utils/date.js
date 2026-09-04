@@ -10,6 +10,12 @@ export const DAY_NAMES = [
 
 export function getDayName(dateString) {
   if (!dateString) return '';
+  const parts = String(dateString).trim().split('-');
+  if (parts.length === 3) {
+    const [y, m, d] = parts.map(Number);
+    const date = new Date(Date.UTC(y, m - 1, d));
+    return DAY_NAMES[date.getUTCDay()];
+  }
   const d = new Date(dateString);
   return isNaN(d.getTime()) ? '' : DAY_NAMES[d.getDay()];
 }
