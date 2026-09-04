@@ -1,0 +1,8 @@
+
+# --- CampusOS ---
+node_modules/
+.env
+server/.env
+client/.env
+dist/
+.DS_Store

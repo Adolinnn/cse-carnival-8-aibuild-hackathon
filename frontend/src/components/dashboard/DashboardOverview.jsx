@@ -51,8 +51,15 @@ export const DashboardOverview = ({
   // High priority announcements
   const highNotices = (announcements || []).filter((a) => a.priority === 'high');
 
-  // Available rooms right now
-  const availableRooms = (rooms || []).filter((r) => r.status === 'available');
+  // Available rooms right now (dynamically checking bookings for simulated date & time)
+  const availableRooms = (rooms || []).filter((r) => {
+    if (r.status !== 'available') return false;
+    const bookings = r.bookings || [];
+    const isBookedNow = bookings.some(
+      (b) => b.date === simulatedDate && b.start_time <= simulatedTime && b.end_time > simulatedTime
+    );
+    return !isBookedNow;
+  });
 
   // Pending assignments
   const pendingAssignments = (assignments || []).filter((a) => a.status === 'pending');

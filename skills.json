@@ -1,0 +1,16 @@
+{
+  "skills": [
+    {
+      "source": "cursor/plugins",
+      "skills": [
+        "thermo-nuclear-code-quality-review"
+      ]
+    },
+    {
+      "source": "mattpocock/skills",
+      "skills": [
+        "improve-codebase-architecture"
+      ]
+    }
+  ]
+}

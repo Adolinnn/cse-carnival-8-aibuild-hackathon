@@ -1,4 +1,5 @@
 import { dataService, DEFAULT_STUDENT, NON_OVERRIDABLE_SAFETY_WRAPPER } from './dataService';
+import { api } from './api';
 
 export const processAgentQuery = async (userPrompt, simulatedDate, simulatedTime, session, agentConfig) => {
   const query = userPrompt.toLowerCase().trim();
@@ -10,7 +11,35 @@ export const processAgentQuery = async (userPrompt, simulatedDate, simulatedTime
   };
   const role = session?.role || 'student';
 
-  // Artificial realistic processing delay
+  // --- 0. Try live backend AI Chat endpoint if available ---
+  try {
+    const res = await api.sendChatMessage([{ role: 'user', content: userPrompt }], session);
+    if (res && res.reply) {
+      const serverReceipts = (res.trace || []).map((t, idx) => ({
+        id: `rcpt-${Date.now()}-${idx + 1}`,
+        toolName: t.tool,
+        input: t.args || {},
+        output: t.result || { status: 'success' },
+        status: t.result && t.result.error ? 'error' : 'success',
+      }));
+
+      // Refresh frontend state since tools like book_room or add_schedule mutate the DB
+      dataService.refreshFromBackend(session).catch(() => {});
+
+      return {
+        id: 'agent-' + Date.now(),
+        sender: 'agent',
+        content: res.reply,
+        receipts: serverReceipts,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      };
+    }
+  } catch (err) {
+    // 503 (no LLM key) or offline - smoothly fallback to client agent
+    console.info('[agentService] Backend LLM agent bypassed, using local engine:', err.message);
+  }
+
+  // Artificial realistic processing delay for client-side demo
   await new Promise((r) => setTimeout(r, 450));
 
   // --- 1. Ambiguity / Clarification check ---
